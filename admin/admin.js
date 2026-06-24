@@ -1522,7 +1522,7 @@ function renderSidebar() {
           row.appendChild(swapBtn);
           var moveBtn = document.createElement("button");
           moveBtn.className = "si-swap-btn";
-          moveBtn.textContent = "move";
+          moveBtn.textContent = "other";
           moveBtn.style.color = "#ffb400";
           (function(cId, cIdx, cEntry) {
             moveBtn.addEventListener("click", function (e) {
