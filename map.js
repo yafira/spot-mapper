@@ -172,11 +172,45 @@ function doSearch(q) {
   banner.innerHTML = "";
 
   if (matchedEntries.length === 0) {
+    // Check Others list from localStorage
+    var others = [];
+    var defaultOthers = window.OTHERS_LIST || [];
+    try {
+      var stored = localStorage.getItem("sats_others");
+      others = stored ? JSON.parse(stored) : defaultOthers;
+    } catch (e) {
+      others = defaultOthers;
+    }
+    var otherMatch = others.filter(function (o) {
+      return o.name.toLowerCase().includes(q);
+    });
+
     banner.className = "result-banner show";
-    var msg = document.createElement("div");
-    msg.className = "result-no";
-    msg.textContent = 'No match for "' + q + '" — try a different spelling.';
-    banner.appendChild(msg);
+    if (otherMatch.length > 0) {
+      otherMatch.forEach(function (o) {
+        var card = document.createElement("div");
+        card.className = "result-card";
+        var nameEl = document.createElement("div");
+        nameEl.className = "result-name";
+        nameEl.textContent = o.name;
+        var noteEl = document.createElement("div");
+        noteEl.className = "result-project";
+        noteEl.textContent = o.note || "";
+        var locEl = document.createElement("div");
+        locEl.className = "result-location";
+        locEl.textContent = "Special arrangement — see staff";
+        card.appendChild(nameEl);
+        card.appendChild(noteEl);
+        card.appendChild(locEl);
+        banner.appendChild(card);
+      });
+    } else {
+      var msg = document.createElement("div");
+      msg.className = "result-no";
+      msg.textContent =
+        'No match for "' + q + '" — try a different spelling or see staff.';
+      banner.appendChild(msg);
+    }
     return;
   }
 
