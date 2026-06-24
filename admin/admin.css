@@ -529,3 +529,21 @@ header {
     flex-direction: column;
   }
 }
+/* Swap button */
+.si-swap-btn {
+  flex-shrink: 0;
+  background: rgba(32, 212, 216, 0.1);
+  border: 1px solid rgba(32, 212, 216, 0.25);
+  color: var(--cyan);
+  font-size: 9px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 4px;
+  cursor: pointer;
+  letter-spacing: 0.04em;
+  transition: background 0.15s;
+  white-space: nowrap;
+}
+.si-swap-btn:hover {
+  background: rgba(32, 212, 216, 0.22);
+}

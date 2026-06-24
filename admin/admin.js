@@ -1463,6 +1463,8 @@ function renderSidebar() {
     if (!item.data) {
       name.className = "si-available-label";
       name.textContent = "Available";
+      info.appendChild(zone);
+      info.appendChild(name);
     } else {
       name.textContent = item.nameText;
       var proj = document.createElement("div");
@@ -1478,13 +1480,27 @@ function renderSidebar() {
         info.appendChild(cb);
       }
     }
-    if (!item.data) {
-      info.appendChild(zone);
-      info.appendChild(name);
-    }
 
     row.appendChild(badge);
     row.appendChild(info);
+
+    // Swap button for assigned spots
+    if (item.data) {
+      (function (capturedId, capturedData) {
+        capturedData.entries.forEach(function (entry, idx) {
+          var swapBtn = document.createElement("button");
+          swapBtn.className = "si-swap-btn";
+          swapBtn.textContent = "swap";
+          swapBtn.title = "Move " + entry.name + " to another spot";
+          swapBtn.addEventListener("click", function (e) {
+            e.stopPropagation();
+            openSwapModal(capturedId, idx);
+          });
+          row.appendChild(swapBtn);
+        });
+      })(item.id, item.data);
+    }
+
     row.addEventListener("click", function () {
       scrollToSpot(item.id);
     });
@@ -1703,3 +1719,73 @@ function resetZoom() {
 // ── Init ──────────────────────────────────────────────────────────────────────
 document.getElementById("mapImg").addEventListener("load", buildSpots);
 document.getElementById("mapImg").src = window.ADMIN_IMG_SRC;
+// ── Swap modal ────────────────────────────────────────────────────────────────
+var swapState = null; // {spotId, entryIndex}
+
+function openSwapModal(spotId, entryIndex) {
+  swapState = { spotId: spotId, entryIndex: entryIndex };
+  var data = FINAL_MAP[String(spotId)];
+  var entry = data.entries[entryIndex];
+
+  document.getElementById("swapPersonName").textContent = entry.name;
+  document.getElementById("swapPersonProject").textContent =
+    entry.project || "";
+  document.getElementById("swapFromSpot").textContent =
+    "Spot " + spotId + " \u00b7 " + (ZONE_MAP[spotId] || "");
+
+  // Populate destination dropdown
+  var sel = document.getElementById("swapToSpot");
+  sel.innerHTML = '<option value="">-- pick a spot --</option>';
+  SPOTS.forEach(function (s) {
+    if (s.id === spotId) return;
+    var status = getSpotStatus(s.id);
+    var zone = ZONE_MAP[s.id] || "";
+    var label = "Spot " + s.id + " \u00b7 " + zone;
+    if (status === "available") label += " \u2713 available";
+    else if (status === "conflict") label += " \u26a0 conflict";
+    var opt = document.createElement("option");
+    opt.value = s.id;
+    opt.textContent = label;
+    if (status === "available") opt.style.color = "#1DB87A";
+    sel.appendChild(opt);
+  });
+
+  document.getElementById("swapModal").style.display = "flex";
+}
+
+function closeSwapModal() {
+  document.getElementById("swapModal").style.display = "none";
+  swapState = null;
+}
+
+function confirmSwap() {
+  if (!swapState) return;
+  var toId = parseInt(document.getElementById("swapToSpot").value);
+  if (!toId) return;
+
+  var fromId = swapState.spotId;
+  var fromData = FINAL_MAP[String(fromId)];
+  var entry = fromData.entries[swapState.entryIndex];
+
+  // Remove from source
+  fromData.entries.splice(swapState.entryIndex, 1);
+  if (fromData.entries.length === 0) delete FINAL_MAP[String(fromId)];
+
+  // Add to destination
+  if (!FINAL_MAP[String(toId)]) {
+    FINAL_MAP[String(toId)] = {
+      entries: [],
+      zone: ZONE_MAP[toId] || "",
+      label: String(toId),
+    };
+  }
+  FINAL_MAP[String(toId)].entries.push(entry);
+
+  closeSwapModal();
+  buildSpots();
+}
+
+// Close on backdrop click
+document.getElementById("swapModal").addEventListener("click", function (e) {
+  if (e.target === this) closeSwapModal();
+});
