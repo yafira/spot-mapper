@@ -1841,11 +1841,11 @@ function confirmSwap() {
     var fromId = swapState.spotId;
     var fromData = FINAL_MAP[String(fromId)];
     var entry = fromData.entries[swapState.entryIndex];
-    var note = prompt("Add a note for " + entry.name + " (optional):", entry.project || "");
     fromData.entries.splice(swapState.entryIndex, 1);
     if (fromData.entries.length === 0) delete FINAL_MAP[String(fromId)];
     saveMapToStorage();
-    OTHERS.push({ name: entry.name, note: note || entry.project || "Moved from spot " + fromId });
+    var note = prompt("Add a note for " + entry.name + " (optional):", entry.project || "") || entry.project || "Moved from spot " + fromId;
+    OTHERS.push({ name: entry.name, note: note });
     saveOthersToStorage();
     renderOthers();
     closeSwapModal();
