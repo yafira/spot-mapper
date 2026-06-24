@@ -976,8 +976,6 @@ var FINAL_MAP = {
     label: "122",
   },
 };
-  // late additions handled above
-};
 // patch in late additions
 FINAL_MAP["98"] = { entries: [{ name: "Kay Zeng", project: "", space_raw: "98 & 99" }], zone: "South Lodge", label: "98" };
 FINAL_MAP["99"] = { entries: [{ name: "Kay Zeng", project: "", space_raw: "98 & 99" }], zone: "South Lodge", label: "99" };
