@@ -762,6 +762,13 @@ function resetZoom() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
+var mapImgReady = false;
+var kvReady = false;
+
+document.getElementById("mapImg").addEventListener("load", function() {
+  mapImgReady = true;
+  if (kvReady) buildSpots();
+});
 document.getElementById("mapImg").src = window.ADMIN_IMG_SRC;
 
 // ── Swap modal ────────────────────────────────────────────────────────────────
