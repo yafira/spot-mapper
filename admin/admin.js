@@ -2105,3 +2105,53 @@ function submitNewCamper() {
       });
   });
 });
+
+// ── Print view ────────────────────────────────────────────────────────────────
+function openPrintView() {
+  var rows = [];
+  SPOTS.forEach(function(s) {
+    var data = FINAL_MAP[String(s.id)];
+    if (!data) return;
+    data.entries.forEach(function(e) {
+      rows.push({ spot: s.id, zone: ZONE_MAP[s.id] || "", name: e.name, project: e.project || "" });
+    });
+  });
+  rows.sort(function(a, b) { return a.spot - b.spot; });
+
+  var html = '<html><head><title>SATS 2026 — Staff List</title><style>'
+    + 'body{font-family:sans-serif;padding:32px;color:#111}'
+    + 'h1{font-size:20px;margin-bottom:4px}p{margin:0 0 24px;color:#666;font-size:13px}'
+    + 'table{width:100%;border-collapse:collapse;font-size:13px}'
+    + 'th{text-align:left;border-bottom:2px solid #000;padding:6px 8px}'
+    + 'td{padding:6px 8px;border-bottom:1px solid #ddd;vertical-align:top}'
+    + 'tr:nth-child(even){background:#f9f9f9}'
+    + '.others{margin-top:32px}'
+    + '.others h2{font-size:16px;margin-bottom:8px}'
+    + '.other-row{padding:6px 0;border-bottom:1px solid #ddd;font-size:13px}'
+    + '@media print{body{padding:16px}}'
+    + '</style></head><body>'
+    + '<h1>ITP Camp 2026 — Show All Things Show</h1>'
+    + '<p>Staff reference · ' + new Date().toLocaleDateString() + '</p>'
+    + '<table><thead><tr><th>Spot</th><th>Zone</th><th>Name</th><th>Project</th></tr></thead><tbody>';
+
+  rows.forEach(function(r) {
+    html += '<tr><td>' + r.spot + '</td><td>' + r.zone + '</td><td>' + r.name + '</td><td>' + r.project + '</td></tr>';
+  });
+
+  html += '</tbody></table>';
+
+  if (OTHERS && OTHERS.length > 0) {
+    html += '<div class="others"><h2>Other / Special Arrangements</h2>';
+    OTHERS.forEach(function(o) {
+      html += '<div class="other-row"><strong>' + o.name + '</strong> — ' + (o.note || "") + '</div>';
+    });
+    html += '</div>';
+  }
+
+  html += '</body></html>';
+
+  var w = window.open("", "_blank");
+  w.document.write(html);
+  w.document.close();
+  w.print();
+}
