@@ -1520,25 +1520,6 @@ function renderSidebar() {
             openSwapModal(capturedId, idx);
           });
           row.appendChild(swapBtn);
-          var moveBtn = document.createElement("button");
-          moveBtn.className = "si-swap-btn";
-          moveBtn.textContent = "other";
-          moveBtn.style.color = "#ffb400";
-          (function(cId, cIdx, cEntry) {
-            moveBtn.addEventListener("click", function (e) {
-              e.stopPropagation();
-              var note = prompt("Note for " + cEntry.name + ":", cEntry.project || "");
-              if (note === null) return;
-              FINAL_MAP[String(cId)].entries.splice(cIdx, 1);
-              if (FINAL_MAP[String(cId)].entries.length === 0) delete FINAL_MAP[String(cId)];
-              saveMapToStorage();
-              OTHERS.push({ name: cEntry.name, note: note || cEntry.project || "Moved from spot " + cId });
-              saveOthersToStorage();
-              renderOthers();
-              buildSpots();
-            });
-          })(capturedId, idx, entry);
-          row.appendChild(moveBtn);
           var modifyBtn = document.createElement("button");
           modifyBtn.className = "si-swap-btn";
           modifyBtn.textContent = "modify";
@@ -1831,6 +1812,8 @@ function openSwapModal(spotId, entryIndex) {
 function closeSwapModal() {
   document.getElementById("swapModal").style.display = "none";
   swapState = null;
+  var w = document.getElementById("swapNoteWrap");
+  if (w) w.remove();
 }
 
 function confirmSwap() {
@@ -1841,13 +1824,36 @@ function confirmSwap() {
     var fromId = swapState.spotId;
     var fromData = FINAL_MAP[String(fromId)];
     var entry = fromData.entries[swapState.entryIndex];
+    // Show note input inside modal
+    var existing = document.getElementById("swapNoteWrap");
+    if (!existing) {
+      var wrap = document.createElement("div");
+      wrap.id = "swapNoteWrap";
+      wrap.style.cssText = "margin-top:12px";
+      var lbl = document.createElement("div");
+      lbl.style.cssText = "font-size:11px;color:var(--muted);margin-bottom:4px";
+      lbl.textContent = "Note (optional):";
+      var inp = document.createElement("input");
+      inp.id = "swapNoteInput";
+      inp.style.cssText = "width:100%;background:var(--surface2);border:1px solid var(--border);color:var(--text);padding:8px 10px;border-radius:7px;font-size:13px;box-sizing:border-box";
+      inp.value = entry.project || "";
+      wrap.appendChild(lbl);
+      wrap.appendChild(inp);
+      document.getElementById("swapFromSpot").parentNode.appendChild(wrap);
+      document.getElementById("swapToSpot").parentNode.appendChild(wrap);
+      inp.focus();
+      return;
+    }
+    var note = document.getElementById("swapNoteInput").value || entry.project || "Moved from spot " + fromId;
     fromData.entries.splice(swapState.entryIndex, 1);
     if (fromData.entries.length === 0) delete FINAL_MAP[String(fromId)];
     saveMapToStorage();
-    var note = prompt("Add a note for " + entry.name + " (optional):", entry.project || "") || entry.project || "Moved from spot " + fromId;
     OTHERS.push({ name: entry.name, note: note });
     saveOthersToStorage();
     renderOthers();
+    // Clean up note input
+    var w = document.getElementById("swapNoteWrap");
+    if (w) w.remove();
     closeSwapModal();
     buildSpots();
     return;
