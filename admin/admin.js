@@ -9,7 +9,9 @@ var isPanning = false,
   panST;
 var importedHeaders = [],
   importedRows = [];
-var OTHERS = [];
+var OTHERS = [
+  { name: "David Stein", note: "Soundscape is too large and loud for spot 102 — setting up in the hallway outside toward the cabins instead. See staff for exact location." }
+];
 
 // Data — loaded from index.html's baked-in data, can be overridden by CSV import
 var FINAL_MAP = {
@@ -719,17 +721,7 @@ var FINAL_MAP = {
     zone: "Craft Corner",
     label: "44",
   },
-  102: {
-    entries: [
-      {
-        name: "David Stein",
-        project: "Soundscape of Salvaged Parts",
-        space_raw: "102",
-      },
-    ],
-    zone: "South Lodge",
-    label: "102",
-  },
+
   103: {
     entries: [
       {
@@ -859,8 +851,8 @@ var FINAL_MAP = {
   120: {
     entries: [
       {
-        name: "Rebecca Odes",
-        project: "investigation of luminous e/motion",
+        name: "Valentine Ye",
+        project: "AI Cyberdeck",
         space_raw: "120 CABIN 1",
       },
     ],
@@ -975,8 +967,8 @@ var FINAL_MAP = {
   122: {
     entries: [
       {
-        name: "Valentine Ye",
-        project: "AI Cyberdeck",
+        name: "Rebecca Odes",
+        project: "investigation of luminous e/motion",
         space_raw: "Cabin 1 - 122",
       },
     ],
@@ -984,6 +976,13 @@ var FINAL_MAP = {
     label: "122",
   },
 };
+  // late additions handled above
+};
+// patch in late additions
+FINAL_MAP["98"] = { entries: [{ name: "Kay Zeng", project: "", space_raw: "98 & 99" }], zone: "South Lodge", label: "98" };
+FINAL_MAP["99"] = { entries: [{ name: "Kay Zeng", project: "", space_raw: "98 & 99" }], zone: "South Lodge", label: "99" };
+FINAL_MAP["128"] = { entries: [{ name: "Shristi Singh", project: "No project title yet", space_raw: "128" }], zone: "Cabin 3", label: "128" };
+
 var SPOTS = [
   { id: 1, x: 277, y: 58 },
   { id: 2, x: 312, y: 58 },
