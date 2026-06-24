@@ -1810,7 +1810,7 @@ function openSwapModal(spotId, entryIndex) {
 
   // Populate destination dropdown
   var sel = document.getElementById("swapToSpot");
-  sel.innerHTML = '<option value="">-- pick a spot --</option><option value="unassigned" style="color:#ffb400">⟶ Unassigned / Others list</option>';
+  sel.innerHTML = '<option value="">-- pick a spot --</option><option value="unassigned" style="color:#ffb400">⟶ Other (with note)</option>';
   SPOTS.forEach(function (s) {
     if (s.id === spotId) return;
     var status = getSpotStatus(s.id);
