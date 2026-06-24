@@ -570,7 +570,11 @@
       ],
       "zone": "North Lodge",
       "label": "63",
-      "sub_labels": ["63.1", "63.2", "63.3"]
+      "sub_labels": [
+        "63.1",
+        "63.2",
+        "63.3"
+      ]
     },
     "64": {
       "entries": [
@@ -609,7 +613,10 @@
       ],
       "zone": "North Lodge",
       "label": "66",
-      "sub_labels": ["66.1", "66.2"]
+      "sub_labels": [
+        "66.1",
+        "66.2"
+      ]
     },
     "68": {
       "entries": [
@@ -1109,8 +1116,8 @@
     "120": {
       "entries": [
         {
-          "name": "Rebecca Odes",
-          "project": "investigation of luminous e/motion",
+          "name": "Valentine Ye",
+          "project": "AI Cyberdeck",
           "space_raw": "120 CABIN 1"
         }
       ],
@@ -1131,8 +1138,8 @@
     "122": {
       "entries": [
         {
-          "name": "Valentine Ye",
-          "project": "AI Cyberdeck",
+          "name": "Rebecca Odes",
+          "project": "investigation of luminous e/motion",
           "space_raw": "Cabin 1 - 122"
         }
       ],
@@ -1160,12 +1167,45 @@
       ],
       "zone": "Cabin 2",
       "label": "124"
+    },
+    "98": {
+      "entries": [
+        {
+          "name": "Kay Zeng",
+          "project": "",
+          "space_raw": "98 & 99"
+        }
+      ],
+      "zone": "South Lodge",
+      "label": "98"
+    },
+    "99": {
+      "entries": [
+        {
+          "name": "Kay Zeng",
+          "project": "",
+          "space_raw": "98 & 99"
+        }
+      ],
+      "zone": "South Lodge",
+      "label": "99"
+    },
+    "128": {
+      "entries": [
+        {
+          "name": "Shristi Singh",
+          "project": "No project title yet",
+          "space_raw": "128"
+        }
+      ],
+      "zone": "Cabin 3",
+      "label": "128"
     }
   },
   "others": [
     {
       "name": "David Stein",
-      "note": "Soundscape too large for spot 102 and makes a lot of noise. Requested hallway outside toward the cabins — typical spot for spring/fall shows. Can help draw people toward the cabins."
+      "note": "Soundscape is too large and loud for spot 102 — setting up in the hallway outside toward the cabins instead. See staff for exact location."
     }
   ]
 }
