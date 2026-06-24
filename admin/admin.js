@@ -1520,6 +1520,25 @@ function renderSidebar() {
             openSwapModal(capturedId, idx);
           });
           row.appendChild(swapBtn);
+          var unassignBtn = document.createElement("button");
+          unassignBtn.className = "si-swap-btn";
+          unassignBtn.textContent = "unassign";
+          unassignBtn.style.color = "#ffb400";
+          (function(cId, cIdx, cEntry) {
+            unassignBtn.addEventListener("click", function (e) {
+              e.stopPropagation();
+              if (confirm("Move " + cEntry.name + " to unassigned list?")) {
+                FINAL_MAP[String(cId)].entries.splice(cIdx, 1);
+                if (FINAL_MAP[String(cId)].entries.length === 0) delete FINAL_MAP[String(cId)];
+                saveMapToStorage();
+                OTHERS.push({ name: cEntry.name, note: cEntry.project || "Moved from spot " + cId });
+                saveOthersToStorage();
+                renderOthers();
+                buildSpots();
+              }
+            });
+          })(capturedId, idx, entry);
+          row.appendChild(unassignBtn);
 
           var delBtn = document.createElement("button");
           delBtn.className = "si-del-btn";
