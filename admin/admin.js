@@ -2128,10 +2128,8 @@ function openPrintView() {
     + '.others{margin-top:32px}'
     + '.others h2{font-size:16px;margin-bottom:8px}'
     + '.other-row{padding:6px 0;border-bottom:1px solid #ddd;font-size:13px}'
-    + '@media print{body{padding:16px}}'
+    + '@media print{body{padding:16px}header,footer{display:none!important}}'
     + '</style></head><body>'
-    + '<h1>ITP Camp 2026 — Show All Things Show</h1>'
-    + '<p>Staff reference · ' + new Date().toLocaleDateString() + '</p>'
     + '<table><thead><tr><th>Spot</th><th>Zone</th><th>Name</th><th>Project</th></tr></thead><tbody>';
 
   rows.forEach(function(r) {
