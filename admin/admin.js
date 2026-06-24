@@ -2155,3 +2155,22 @@ function openPrintView() {
   w.document.close();
   w.print();
 }
+
+// ── On load: sync FINAL_MAP and OTHERS from KV ────────────────────────────────
+(function syncFromKV() {
+  fetch("/api/get-data")
+    .then(function(r) { return r.json(); })
+    .then(function(data) {
+      if (data.finalMap && Object.keys(data.finalMap).length > 0) {
+        FINAL_MAP = data.finalMap;
+      }
+      if (data.others && data.others.length > 0) {
+        OTHERS = data.others;
+        renderOthers();
+      }
+      buildSpots();
+    })
+    .catch(function() {
+      buildSpots();
+    });
+})();
