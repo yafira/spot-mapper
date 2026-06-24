@@ -762,7 +762,6 @@ function resetZoom() {
 }
 
 // ── Init ──────────────────────────────────────────────────────────────────────
-document.getElementById("mapImg").addEventListener("load", buildSpots);
 document.getElementById("mapImg").src = window.ADMIN_IMG_SRC;
 
 // ── Swap modal ────────────────────────────────────────────────────────────────
