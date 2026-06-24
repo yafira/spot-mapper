@@ -1,5 +1,3 @@
-import DEFAULT_DATA from "../data.json" assert { type: "json" };
-
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
   res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
@@ -7,12 +5,16 @@ export default async function handler(req, res) {
     res.status(200).end();
     return;
   }
+
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
   if (!url || !token) {
     res.status(500).json({ error: "Missing KV env vars" });
     return;
   }
+
+  const DEFAULT_DATA = require("../data.json");
+
   try {
     const [mapRes, othersRes] = await Promise.all([
       fetch(`${url}/get/sats_final_map`, {
@@ -37,8 +39,7 @@ export default async function handler(req, res) {
 
     res.status(200).json({ finalMap, others });
   } catch (e) {
-    console.error("get-data error:", e);
-    // Full fallback to data.json if KV is down
+    const DEFAULT_DATA = require("../data.json");
     res.status(200).json(DEFAULT_DATA);
   }
 }
