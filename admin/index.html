@@ -3,13 +3,13 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Show All Things Show 2026 — Admin</title>
+    <title>ITP CAMP — Admin</title>
     <link rel="stylesheet" href="/admin/admin.css" />
   </head>
   <body>
     <header>
       <div class="header-left">
-        <span class="brand">Show All Things Show 2026</span>
+        <span class="brand">ITP CAMP 2026</span>
         <span class="admin-badge">Admin</span>
       </div>
       <div class="header-actions">
@@ -194,15 +194,49 @@
             "
             >Spot #
             <span style="font-weight: 400; opacity: 0.6"
-              >(optional)</span
+              >(or leave blank)</span
             ></label
           >
           <input
             id="newSpot"
-            placeholder="e.g. 42"
-            type="number"
-            min="1"
-            max="131"
+            placeholder="e.g. 42 or Other"
+            type="text"
+            style="
+              background: var(--surface2);
+              border: 1px solid var(--border);
+              color: var(--text);
+              padding: 8px 10px;
+              border-radius: 7px;
+              font-size: 13px;
+              outline: none;
+              font-family: var(--font);
+            "
+          />
+        </div>
+        <div
+          style="
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            flex: 2;
+            min-width: 140px;
+          "
+        >
+          <label
+            style="
+              font-size: 10px;
+              color: var(--muted);
+              text-transform: uppercase;
+              letter-spacing: 0.07em;
+            "
+            >Note
+            <span style="font-weight: 400; opacity: 0.6"
+              >(if Other)</span
+            ></label
+          >
+          <input
+            id="newNote"
+            placeholder="e.g. needs hallway, no spot yet..."
             style="
               background: var(--surface2);
               border: 1px solid var(--border);

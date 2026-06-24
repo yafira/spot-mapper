@@ -1966,6 +1966,9 @@ function submitNewCamper() {
   var spotRaw = document.getElementById("newSpot")
     ? document.getElementById("newSpot").value.trim()
     : "";
+  var note = document.getElementById("newNote")
+    ? document.getElementById("newNote").value.trim()
+    : "";
   var msg = document.getElementById("addCamperMsg");
   var spotId = parseInt(spotRaw);
 
@@ -2008,7 +2011,7 @@ function submitNewCamper() {
     // No spot — add to Others/unassigned
     OTHERS.push({
       name: name,
-      note: project || "Late submission — no spot assigned",
+      note: note || project || "Late submission — no spot assigned",
     });
     saveOthersToStorage();
     renderOthers();
