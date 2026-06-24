@@ -1,9 +1,19 @@
 export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*");
-  res.setHeader("Access-Control-Allow-Methods", "GET");
+  res.setHeader("Access-Control-Allow-Methods", "GET, OPTIONS");
+
+  if (req.method === "OPTIONS") {
+    res.status(200).end();
+    return;
+  }
 
   const url = process.env.KV_REST_API_URL;
   const token = process.env.KV_REST_API_TOKEN;
+
+  if (!url || !token) {
+    res.status(500).json({ error: "Missing KV env vars" });
+    return;
+  }
 
   try {
     const [mapRes, othersRes] = await Promise.all([
@@ -18,11 +28,15 @@ export default async function handler(req, res) {
     const mapJson = await mapRes.json();
     const othersJson = await othersRes.json();
 
+    console.log("mapJson:", JSON.stringify(mapJson).slice(0, 100));
+    console.log("othersJson:", JSON.stringify(othersJson).slice(0, 100));
+
     res.status(200).json({
       finalMap: mapJson.result ? JSON.parse(mapJson.result) : null,
       others: othersJson.result ? JSON.parse(othersJson.result) : [],
     });
   } catch (e) {
+    console.error("get-data error:", e);
     res.status(500).json({ error: e.message });
   }
 }
