@@ -28,29 +28,28 @@ export default async function handler(req, res) {
     const { finalMap, others } = req.body;
     const saves = [];
 
+    // Upstash REST: POST /set/key with plain string body
     if (finalMap !== undefined) {
       saves.push(
-        fetch(`${url}/set/sats_final_map`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        fetch(
+          `${url}/set/sats_final_map/${encodeURIComponent(JSON.stringify(finalMap))}`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
           },
-          body: JSON.stringify({ value: JSON.stringify(finalMap) }),
-        }),
+        ),
       );
     }
 
     if (others !== undefined) {
       saves.push(
-        fetch(`${url}/set/sats_others`, {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${token}`,
-            "Content-Type": "application/json",
+        fetch(
+          `${url}/set/sats_others/${encodeURIComponent(JSON.stringify(others))}`,
+          {
+            method: "GET",
+            headers: { Authorization: `Bearer ${token}` },
           },
-          body: JSON.stringify({ value: JSON.stringify(others) }),
-        }),
+        ),
       );
     }
 
