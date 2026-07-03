@@ -4,7 +4,7 @@ A map-based spot assignment tool for exhibitions, showcases, and events. Upload 
 
 Built by [Yafira Martinez](https://yafira.xyz) for the **Show All Things Show**, the end-of-camp showcase at [ITP Camp](https://itp.nyu.edu/camp/) 2026 + beyond.
 
-![tool in action](./show-mapper.gif)
+![tool in action](./spot-mapper.gif)
 
 ## What it does
 
