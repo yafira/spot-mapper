@@ -4,6 +4,8 @@ A map-based spot assignment tool for exhibitions, showcases, and events. Upload 
 
 Built by [Yafira Martinez](https://yafira.xyz) for the **Show All Things Show**, the end-of-camp showcase at [ITP Camp](https://itp.nyu.edu/camp/) 2026 + beyond.
 
+![tool in action](./show-mapper.gif)
+
 ## What it does
 
 - **Any map**: drop in any floor plan image (jpg, png). Pins are placed in the image's own coordinate space, so it works for any venue at any scale.
