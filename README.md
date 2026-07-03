@@ -36,9 +36,15 @@ To change the default profile for a deployment, edit `DEFAULT_PROFILE` in `app.j
 The app has two faces:
 
 - **Viewer (default)**: everyone with the link gets a read-only view — the map, search, the placements list, and the print list. No edit mode, no imports, no resets, no swap.
-- **Admin**: unlocks the full toolkit (edit mode, data import/export, swap, resets, profile switching). Visit `https://your-app.vercel.app/?admin=YOURTOKEN` once — the key is stored in the browser and scrubbed from the address bar. Use the ⚿ admin badge's **exit** button (or `/?admin=off`) to drop back to viewer mode.
+- **Admin**: unlocks the full toolkit (edit mode, data import/export, swap, resets, profile switching). Go to `https://your-app.vercel.app/admin` and enter the admin password — it's checked against the backend, stored in the browser, and you're redirected to the app unlocked. The same page shows a log-out option once a device is unlocked. (`/?admin=YOURTOKEN` also works as a shortcut, and `/?admin=off` or the ⚿ badge's **exit** button drop back to viewer mode.)
 
-To enforce this on the backend, set an `ADMIN_TOKEN` environment variable in your Vercel project (any long random string) and redeploy. Once set, POST/DELETE requests to `/api/state` and `/api/map` require a matching `x-admin-token` header — hiding the buttons alone isn't security, this is what actually locks it down.
+To enforce this on the backend, set an `ADMIN_TOKEN` environment variable in your Vercel project and redeploy. There's no generation step — the token is just a password you invent, and the only rule is that the env var and the value in the `?admin=` URL are the same string:
+
+1. Make up a secret (a long random string is best).
+2. In Vercel: project → **Settings → Environment Variables** → add `ADMIN_TOKEN` with that value, then redeploy so it takes effect.
+3. Open `/admin` on your own device and enter that secret.
+
+Once set, POST/DELETE requests to `/api/state` and `/api/map` require a matching `x-admin-token` header — hiding the buttons alone isn't security, this is what actually locks it down. The token lives only in the env var and your browser's localStorage, never in the deployed frontend code.
 
 If `ADMIN_TOKEN` is **not** set, the backend stays open like before, but the UI still defaults to viewer mode, so any token passed via `?admin=` unlocks the admin toolbar. Fine for a trusted, short-lived event; set the env var if you want it real.
 

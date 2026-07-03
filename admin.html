@@ -1,0 +1,198 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>spot mapper ✦ admin</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Fredoka+One&family=Nunito:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="styles.css" />
+    <style>
+      body {
+        align-items: center;
+        justify-content: center;
+      }
+      .admin-card {
+        background: var(--cloud);
+        border: 2px solid var(--lavender);
+        border-radius: 12px;
+        padding: 28px;
+        width: min(340px, calc(100vw - 32px));
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        box-shadow: 0 4px 16px rgba(59, 51, 84, 0.12);
+      }
+      .admin-card h1 {
+        font-size: 1.2rem;
+        text-align: center;
+      }
+      .admin-card p {
+        margin: 0;
+        font-size: 0.85rem;
+        text-align: center;
+        opacity: 0.7;
+      }
+      .admin-card input[type="password"] {
+        font-family: inherit;
+        font-size: 0.9rem;
+        padding: 8px 12px;
+        border: 2px solid var(--lavender);
+        border-radius: 6px;
+        color: var(--ink);
+      }
+      .admin-card input[type="password"]:focus {
+        outline: none;
+        border-color: var(--lavender-deep);
+      }
+      .admin-card button {
+        justify-content: center;
+        padding: 8px;
+      }
+      .admin-error {
+        font-size: 0.8rem;
+        font-weight: 700;
+        color: #c0392b;
+        text-align: center;
+        margin: 0;
+        min-height: 1em;
+      }
+      .admin-back {
+        font-size: 0.8rem;
+        text-align: center;
+        color: var(--lavender-deep);
+        font-weight: 700;
+        text-decoration: none;
+      }
+      .admin-back:hover {
+        text-decoration: underline;
+      }
+      .admin-unlocked {
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+      }
+      body.unlocked .admin-locked {
+        display: none;
+      }
+      body.unlocked .admin-unlocked {
+        display: flex;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="admin-card">
+      <h1>⚿ admin</h1>
+
+      <form class="admin-locked" id="adminform">
+        <p>enter the admin password to unlock editing on this device</p>
+        <input
+          type="password"
+          id="adminpass"
+          placeholder="admin password"
+          aria-label="Admin password"
+          autocomplete="current-password"
+          autofocus
+        />
+        <p class="admin-error" id="adminerror"></p>
+        <button type="submit" id="unlockbtn">unlock ✦</button>
+        <a class="admin-back" href="/">← back to the map</a>
+      </form>
+
+      <div class="admin-unlocked">
+        <p>this device is already unlocked ✦</p>
+        <button id="gotomap">go to the map</button>
+        <button id="lockbtn" class="btn-danger">log out of admin</button>
+      </div>
+    </div>
+
+    <script>
+      (function () {
+        var STORAGE_KEY = "spotmapper:admintoken";
+        var form = document.getElementById("adminform");
+        var passInput = document.getElementById("adminpass");
+        var errorEl = document.getElementById("adminerror");
+        var unlockBtn = document.getElementById("unlockbtn");
+
+        function checkToken(token) {
+          var headers = {};
+          if (token) headers["x-admin-token"] = token;
+          return fetch("/api/state?auth=1", { headers: headers }).then(
+            function (r) {
+              return r.ok ? r.json() : null;
+            },
+          );
+        }
+
+        // already holding a valid key? show the unlocked view instead of the form
+        var stored = null;
+        try {
+          stored = localStorage.getItem(STORAGE_KEY);
+        } catch (err) {}
+        if (stored) {
+          checkToken(stored)
+            .then(function (data) {
+              if (data && data.admin) {
+                document.body.classList.add("unlocked");
+              }
+            })
+            .catch(function () {});
+        }
+
+        form.addEventListener("submit", function (e) {
+          e.preventDefault();
+          var value = passInput.value.trim();
+          if (!value) {
+            passInput.focus();
+            return;
+          }
+          errorEl.textContent = "";
+          unlockBtn.disabled = true;
+          unlockBtn.textContent = "checking…";
+
+          checkToken(value)
+            .then(function (data) {
+              if (data && data.admin) {
+                try {
+                  localStorage.setItem(STORAGE_KEY, value);
+                } catch (err) {}
+                window.location.href = "/";
+              } else if (data && data.admin === false) {
+                errorEl.textContent = "that's not the password ✗";
+                unlockBtn.disabled = false;
+                unlockBtn.textContent = "unlock ✦";
+                passInput.select();
+              } else {
+                errorEl.textContent = "backend didn't answer, try again";
+                unlockBtn.disabled = false;
+                unlockBtn.textContent = "unlock ✦";
+              }
+            })
+            .catch(function () {
+              errorEl.textContent = "couldn't reach the backend, try again";
+              unlockBtn.disabled = false;
+              unlockBtn.textContent = "unlock ✦";
+            });
+        });
+
+        document
+          .getElementById("gotomap")
+          .addEventListener("click", function () {
+            window.location.href = "/";
+          });
+        document
+          .getElementById("lockbtn")
+          .addEventListener("click", function () {
+            try {
+              localStorage.removeItem(STORAGE_KEY);
+            } catch (err) {}
+            document.body.classList.remove("unlocked");
+            passInput.value = "";
+            passInput.focus();
+          });
+      })();
+    </script>
+  </body>
+</html>
