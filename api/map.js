@@ -1,9 +1,10 @@
 // shared map image endpoint for spot mapper
 // the image travels as a data url split into chunks since kv values and function bodies have size limits
-// GET  /api/map?profile=sats                       returns meta {name, parts, version, dims} or null
-// GET  /api/map?profile=sats&v=123&part=0          returns one chunk {data}, cached immutably per version
-// POST /api/map?profile=sats&v=123&part=0          stores one chunk, body {data}
-// POST /api/map?profile=sats&v=123&finalize=1      stores meta and deletes the previous version's chunks
+// GET    /api/map?profile=sats                       returns meta {name, parts, version, dims} or null
+// GET    /api/map?profile=sats&v=123&part=0          returns one chunk {data}, cached immutably per version
+// POST   /api/map?profile=sats&v=123&part=0          stores one chunk, body {data}
+// POST   /api/map?profile=sats&v=123&finalize=1      stores meta and deletes the previous version's chunks
+// DELETE /api/map?profile=sats                       wipes the stored map (meta + all its chunks) for that profile
 
 module.exports = async function handler(req, res) {
   var base = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -136,7 +137,22 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "DELETE") {
+      var metaRaw = await redis(["GET", prefix + ":meta"]);
+      if (metaRaw.result) {
+        try {
+          var meta = JSON.parse(metaRaw.result);
+          for (var j = 0; j < (meta.parts || 0); j++) {
+            await redis(["DEL", prefix + ":" + meta.version + ":" + j]);
+          }
+        } catch (err) {}
+      }
+      await redis(["DEL", prefix + ":meta"]);
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    res.setHeader("Allow", "GET, POST, DELETE");
     res.status(405).json({ error: "method not allowed" });
   } catch (err) {
     res.status(500).json({ error: "kv request failed" });

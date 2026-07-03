@@ -1,6 +1,7 @@
 // shared state endpoint for spot mapper
-// GET  /api/state?profile=sats   returns saved state or null
-// POST /api/state?profile=sats   saves the posted json
+// GET    /api/state?profile=sats   returns saved state or null
+// POST   /api/state?profile=sats   saves the posted json
+// DELETE /api/state?profile=sats   wipes the saved state for that profile
 // needs upstash kv env vars set in vercel
 
 module.exports = async function handler(req, res) {
@@ -62,7 +63,13 @@ module.exports = async function handler(req, res) {
       return;
     }
 
-    res.setHeader("Allow", "GET, POST");
+    if (req.method === "DELETE") {
+      await redis(["DEL", key]);
+      res.status(200).json({ ok: true });
+      return;
+    }
+
+    res.setHeader("Allow", "GET, POST, DELETE");
     res.status(405).json({ error: "method not allowed" });
   } catch (err) {
     res.status(500).json({ error: "kv request failed" });

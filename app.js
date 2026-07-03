@@ -1248,6 +1248,106 @@
     closeDataMenu();
   });
 
+  // clears the on-screen map/pins and returns the ui to the empty state
+  function wipeLocalView() {
+    clearTimeout(syncTimer);
+    stopQueue();
+    if (swapMode) swapBtn.click();
+    editingId = null;
+    swapFirstId = null;
+
+    spots = [];
+    locs = [];
+    imgName = null;
+    imgDims = null;
+    if (overlay && map) {
+      map.removeLayer(overlay);
+      overlay = null;
+    }
+    updateDatalist();
+    refreshMarkers();
+    emptyEl.style.display = "flex";
+    refreshStatus();
+  }
+
+  // deletes one profile's saved state + map from the shared backend
+  function wipeProfileBackend(profileKey) {
+    return Promise.all([
+      fetch(SYNC_ENDPOINT + "?profile=" + encodeURIComponent(profileKey), {
+        method: "DELETE",
+      }),
+      fetch(MAP_ENDPOINT + "?profile=" + encodeURIComponent(profileKey), {
+        method: "DELETE",
+      }),
+    ]);
+  }
+
+  document.getElementById("resetbtn").addEventListener("click", function () {
+    var config = APP_CONFIGS[activeProfile];
+    var label = (config && config.title) || activeProfile;
+    var sure = window.confirm(
+      'reset "' +
+        label +
+        '"? this deletes the map and all spots/locations for everyone, on this device and in the shared backend. this cannot be undone.',
+    );
+    if (!sure) return;
+
+    wipeLocalView();
+
+    flashStatus("resetting…");
+    var profileAtReset = activeProfile;
+    wipeProfileBackend(profileAtReset)
+      .then(function (results) {
+        var ok = results.every(function (r) {
+          return r.ok;
+        });
+        flashStatus(ok ? "reset ☁" : "reset locally, backend clear failed");
+      })
+      .catch(function () {
+        flashStatus("reset locally, backend is offline");
+      });
+  });
+
+  document.getElementById("resetallbtn").addEventListener("click", function () {
+    var profileKeys = Object.keys(APP_CONFIGS);
+    var names = profileKeys
+      .map(function (k) {
+        return (APP_CONFIGS[k] && APP_CONFIGS[k].title) || k;
+      })
+      .join(", ");
+    var sure = window.confirm(
+      "reset ALL profiles (" +
+        names +
+        ")? this deletes every map and every spot/location for everyone, on this device and in the shared backend, regardless of which profile is currently open. this cannot be undone.",
+    );
+    if (!sure) return;
+
+    // the view is showing one of the profiles being wiped, so clear it too
+    wipeLocalView();
+
+    flashStatus("resetting all profiles…");
+    Promise.all(
+      profileKeys.map(function (key) {
+        return wipeProfileBackend(key);
+      }),
+    )
+      .then(function (perProfileResults) {
+        var ok = perProfileResults.every(function (results) {
+          return results.every(function (r) {
+            return r.ok;
+          });
+        });
+        flashStatus(
+          ok
+            ? "all profiles reset ☁"
+            : "reset locally, some backend clears failed",
+        );
+      })
+      .catch(function () {
+        flashStatus("reset locally, backend is offline");
+      });
+  });
+
   document
     .getElementById("importfile")
     .addEventListener("change", function (e) {

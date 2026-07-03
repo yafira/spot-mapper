@@ -167,6 +167,18 @@ input[type="search"]:focus {
   display: flex;
   flex-direction: column;
   z-index: 5;
+  transition:
+    width 0.2s ease,
+    opacity 0.15s ease;
+}
+/* desktop: "hide list" collapses the sidebar to give the map more room */
+.app-container.sidebar-collapsed #sidebar {
+  width: 0;
+  min-width: 0;
+  opacity: 0;
+  overflow: hidden;
+  border-left: none;
+  pointer-events: none;
 }
 .sidebar-header {
   padding: 14px 16px;
@@ -353,6 +365,15 @@ input[type="search"]:focus {
 .dropdown-menu label.filebtn:hover {
   background: var(--lavender-mist);
   color: var(--lavender-deep);
+}
+.btn-danger {
+  color: #c0392b;
+  border-color: #e5a49a;
+}
+.btn-danger:hover {
+  background: #fdecea;
+  border-color: #c0392b;
+  color: #c0392b;
 }
 .floating-panel {
   position: absolute;
@@ -638,6 +659,65 @@ input[type="search"]:focus {
 }
 .print-only {
   display: none;
+}
+
+/* mobile: lead with search + the placements list, since a tiny map is hard to use.
+   the map is one tap away via #viewtogglebtn instead of being removed outright. */
+@media (max-width: 780px) {
+  header {
+    padding: 10px 12px;
+    gap: 8px;
+  }
+  .controls {
+    width: 100%;
+  }
+  input[type="search"] {
+    order: -2;
+    flex: 1 1 100%;
+    width: 100%;
+  }
+  #viewtogglebtn {
+    order: -1;
+  }
+  .status-bar {
+    margin-left: 0;
+  }
+
+  .app-container {
+    flex-direction: column;
+  }
+  /* map is hidden by default on mobile */
+  #map-wrapper {
+    display: none;
+  }
+  #sidebar {
+    width: 100%;
+    flex: 1;
+    border-left: none;
+    opacity: 1;
+    pointer-events: auto;
+  }
+  /* #viewtogglebtn adds .show-map to flip which one is visible */
+  .app-container.show-map #map-wrapper {
+    display: block;
+    flex: 1;
+  }
+  .app-container.show-map #sidebar {
+    display: none;
+  }
+
+  .dropdown-menu {
+    left: 0;
+    right: 0;
+    min-width: 0;
+  }
+
+  .floating-panel {
+    left: 12px;
+    right: 12px;
+    bottom: 12px;
+    width: auto;
+  }
 }
 
 @media print {
