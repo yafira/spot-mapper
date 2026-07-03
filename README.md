@@ -2,7 +2,7 @@
 
 A map-based spot assignment tool for exhibitions, showcases, and events. Upload any floor plan image, drop pins for exhibitors and named locations, import rosters from spreadsheets, and share the live layout with everyone through a link.
 
-Built by [Yafira Martinez](https://yafira.xyz) for the **Show All Things Show**, the end-of-camp showcase at [ITP Camp](https://itp.nyu.edu/camp/) 2026.
+Built by [Yafira Martinez](https://yafira.xyz) for the **Show All Things Show**, the end-of-camp showcase at [ITP Camp](https://itp.nyu.edu/camp/) 2026 + beyond.
 
 ## What it does
 
