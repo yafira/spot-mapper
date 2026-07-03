@@ -1,4 +1,4 @@
-# spot mapper ✦
+# spot mapper ⌖
 
 A map-based spot assignment tool for exhibitions, showcases, and events. Upload any floor plan image, drop pins for exhibitors and named locations, import rosters from spreadsheets, and share the live layout with everyone through a link.
 
