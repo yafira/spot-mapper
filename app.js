@@ -21,7 +21,7 @@
     sats: {
       title: "show all things show ✦ spot mapper",
       btnText: "△ Profile: SATS ▾",
-      logo: "itpcamp-logo.png",
+      logo: "itpcamp_logo.png",
       logoAlt: "ITP Camp",
       mapUrl: null,
       mapName: null,
