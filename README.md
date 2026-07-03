@@ -11,7 +11,7 @@ Built by [Yafira Martinez](https://yafira.xyz) for the **Show All Things Show**,
 - **Spreadsheet import**: bring in a roster from `.csv`, `.xlsx`, or `.xls`. Header names are matched loosely (name/camper/who, spot/space/#, project/title, notes/description, and so on). Rows without a name are skipped, so banner rows and duplicate headers in real-world exports don't become phantom entries. Imported people queue up and you click the map to place each one.
 - **Shared state**: placements and the map image live in a shared database, so anyone with the link sees the current layout. No accounts, no local-only data.
 - **Search**: find anyone by name, spot, project, location, or notes. Matches light up on the map.
-- **Swap mode**: click any two people to trade their spots and positions.
+- **Swap mode**: click any two people to trade their spots — position, spot number, and location assignment all move together.
 - **Print list**: a clean printable roster grouped by location, sorted by spot number.
 - **Profiles**: the app ships with a Generic profile (blank engine) and a Show All Things Show profile (camp theme). Each profile keeps its own map and placements.
 

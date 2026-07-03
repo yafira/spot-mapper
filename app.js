@@ -21,7 +21,7 @@
     sats: {
       title: "show all things show ✦ spot mapper",
       btnText: "△ Profile: SATS ▾",
-      logo: "itpcamp_logo.png",
+      logo: "itpcamp-logo.png",
       logoAlt: "ITP Camp",
       mapUrl: null,
       mapName: null,
@@ -716,6 +716,12 @@
         var tmpSpot = a.spot;
         a.spot = b.spot;
         b.spot = tmpSpot;
+
+        // the location label belongs to the physical spot, so it trades too.
+        // if one side has no location, the other side correctly ends up blank.
+        var tmpLocation = a.location;
+        a.location = b.location;
+        b.location = tmpLocation;
 
         if (markers[a.id]) {
           markers[a.id].setLatLng([a.lat, a.lng]);
