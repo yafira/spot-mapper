@@ -14,6 +14,35 @@
 [hidden] {
   display: none !important;
 }
+/* admin gating: the page loads in viewer mode, app.js adds .is-admin to <body>
+   once the stored admin key checks out. real enforcement lives in the api. */
+body:not(.is-admin) .admin-only {
+  display: none !important;
+}
+body.is-admin .viewer-prompt {
+  display: none !important;
+}
+.admin-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--lavender-deep);
+  background: var(--lavender-mist);
+  border: 2px dashed var(--lavender);
+  padding: 3px 8px;
+  border-radius: 6px;
+}
+.admin-badge button {
+  padding: 1px 6px;
+  font-size: 0.7rem;
+  border-radius: 4px;
+}
+/* the map/list toggle only matters on small screens */
+#viewtogglebtn {
+  display: none;
+}
 body {
   margin: 0;
   font-family: "Nunito", system-ui, sans-serif;
@@ -677,10 +706,19 @@ input[type="search"]:focus {
     width: 100%;
   }
   #viewtogglebtn {
+    display: inline-flex;
     order: -1;
+    flex: 1;
+    justify-content: center;
   }
   .status-bar {
     margin-left: 0;
+    flex: 1 1 100%;
+    text-align: center;
+  }
+  /* actions stay visible on touch screens, there is no hover to reveal them */
+  body.is-admin .si-actions {
+    opacity: 1;
   }
 
   .app-container {

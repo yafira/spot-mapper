@@ -18,7 +18,7 @@
     <header>
       <h1 id="app-title">spot mapper ✦</h1>
       <div class="controls">
-        <div class="dropdown" id="profiledrop">
+        <div class="dropdown admin-only" id="profiledrop">
           <button id="profilebtn" aria-haspopup="true" aria-expanded="false">
             ◇ Profile: Generic ▾
           </button>
@@ -32,15 +32,18 @@
           </div>
         </div>
 
-        <button id="editbtn" aria-pressed="false">✎ edit mode</button>
+        <button id="editbtn" class="admin-only" aria-pressed="false">
+          ✎ edit mode
+        </button>
         <input
           type="search"
           id="search"
           placeholder="search a name…"
           aria-label="Search a name"
         />
+        <button id="viewtogglebtn" aria-pressed="false">⌖ map</button>
 
-        <div class="dropdown" id="datadrop">
+        <div class="dropdown admin-only" id="datadrop">
           <button id="databtn" aria-haspopup="true" aria-expanded="false">
             ⇅ data ▾
           </button>
@@ -58,12 +61,21 @@
           </div>
         </div>
 
-        <button id="swapbtn" aria-pressed="false">⇄ swap spots</button>
+        <button id="swapbtn" class="admin-only" aria-pressed="false">
+          ⇄ swap spots
+        </button>
         <button id="printbtn">⎙ print list</button>
-        <button id="resetbtn" class="btn-danger">⨯ reset this profile</button>
-        <button id="resetallbtn" class="btn-danger">
+        <button id="resetbtn" class="btn-danger admin-only">
+          ⨯ reset this profile
+        </button>
+        <button id="resetallbtn" class="btn-danger admin-only">
           ⨯⨯ reset ALL profiles
         </button>
+        <span id="adminbadge" class="admin-only admin-badge"
+          >⚿ admin<button id="adminlogout" title="leave admin mode">
+            exit
+          </button></span
+        >
         <span id="swaphint" class="hint-text" hidden
           >⇄ click any two sidebar items or map pins to switch them</span
         >
@@ -75,7 +87,7 @@
       <main id="map-wrapper">
         <div id="map"></div>
         <div id="empty" class="uploadzone">
-          <div class="upload-prompt">
+          <div class="upload-prompt admin-only">
             <p class="big-emoji">⌖</p>
             <p><strong>drop a map blueprint image here</strong></p>
             <p class="or-text">or</p>
@@ -85,6 +97,11 @@
                 id="mapfile"
                 accept="image/*"
             /></label>
+          </div>
+          <div class="upload-prompt viewer-prompt">
+            <p class="big-emoji">⌖</p>
+            <p><strong>no map has been shared yet</strong></p>
+            <p class="or-text">check back soon ✦</p>
           </div>
         </div>
       </main>

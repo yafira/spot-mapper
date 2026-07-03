@@ -16,6 +16,13 @@ module.exports = async function handler(req, res) {
     return;
   }
 
+  // set an ADMIN_TOKEN env var to lock down writes, leave it unset for open editing
+  var adminSecret = process.env.ADMIN_TOKEN || "";
+  function isAuthed() {
+    if (!adminSecret) return true;
+    return req.headers["x-admin-token"] === adminSecret;
+  }
+
   var profile = String(req.query.profile || "generic").replace(
     /[^a-zA-Z0-9_-]/g,
     "",
@@ -65,6 +72,10 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      if (!isAuthed()) {
+        res.status(401).json({ error: "admin token required" });
+        return;
+      }
       if (req.query.finalize) {
         var body = parseBody();
         if (
@@ -138,6 +149,10 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "DELETE") {
+      if (!isAuthed()) {
+        res.status(401).json({ error: "admin token required" });
+        return;
+      }
       var metaRaw = await redis(["GET", prefix + ":meta"]);
       if (metaRaw.result) {
         try {

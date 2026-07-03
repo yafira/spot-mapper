@@ -33,7 +33,16 @@ To change the default profile for a deployment, edit `DEFAULT_PROFILE` in `app.j
 
 ## A note on access
 
-Anyone with the link can view _and_ edit. That's a deliberate choice for a trusted, short-lived event context. If your event needs locked-down editing, add a token check to the POST branches of the two API functions.
+The app has two faces:
+
+- **Viewer (default)**: everyone with the link gets a read-only view — the map, search, the placements list, and the print list. No edit mode, no imports, no resets, no swap.
+- **Admin**: unlocks the full toolkit (edit mode, data import/export, swap, resets, profile switching). Visit `https://your-app.vercel.app/?admin=YOURTOKEN` once — the key is stored in the browser and scrubbed from the address bar. Use the ⚿ admin badge's **exit** button (or `/?admin=off`) to drop back to viewer mode.
+
+To enforce this on the backend, set an `ADMIN_TOKEN` environment variable in your Vercel project (any long random string) and redeploy. Once set, POST/DELETE requests to `/api/state` and `/api/map` require a matching `x-admin-token` header — hiding the buttons alone isn't security, this is what actually locks it down.
+
+If `ADMIN_TOKEN` is **not** set, the backend stays open like before, but the UI still defaults to viewer mode, so any token passed via `?admin=` unlocks the admin toolbar. Fine for a trusted, short-lived event; set the env var if you want it real.
+
+On mobile, the same split applies. Small screens lead with search and the placements list, and the **⌖ map / ☰ list** button flips between the list and a full-screen map. Tapping a camper in the list jumps straight to their pin on the map.
 
 ## License
 

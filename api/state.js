@@ -1,8 +1,10 @@
 // shared state endpoint for spot mapper
 // GET    /api/state?profile=sats   returns saved state or null
-// POST   /api/state?profile=sats   saves the posted json
-// DELETE /api/state?profile=sats   wipes the saved state for that profile
+// GET    /api/state?auth=1         reports whether the x-admin-token header is valid
+// POST   /api/state?profile=sats   saves the posted json (admin token required if configured)
+// DELETE /api/state?profile=sats   wipes the saved state for that profile (admin token required if configured)
 // needs upstash kv env vars set in vercel
+// set an ADMIN_TOKEN env var to lock down editing, leave it unset for open editing
 
 module.exports = async function handler(req, res) {
   var base = process.env.KV_REST_API_URL || process.env.UPSTASH_REDIS_REST_URL;
@@ -11,6 +13,19 @@ module.exports = async function handler(req, res) {
 
   if (!base || !token) {
     res.status(500).json({ error: "kv is not configured" });
+    return;
+  }
+
+  var adminSecret = process.env.ADMIN_TOKEN || "";
+  function isAuthed() {
+    // no token configured means the deployment runs open, the original behavior
+    if (!adminSecret) return true;
+    return req.headers["x-admin-token"] === adminSecret;
+  }
+
+  if (req.method === "GET" && req.query.auth !== undefined) {
+    res.setHeader("Cache-Control", "no-store");
+    res.status(200).json({ admin: isAuthed(), protected: !!adminSecret });
     return;
   }
 
@@ -41,6 +56,10 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "POST") {
+      if (!isAuthed()) {
+        res.status(401).json({ error: "admin token required" });
+        return;
+      }
       var body = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
       if (!body || typeof body !== "object") {
         res.status(400).json({ error: "expected a json body" });
@@ -64,6 +83,10 @@ module.exports = async function handler(req, res) {
     }
 
     if (req.method === "DELETE") {
+      if (!isAuthed()) {
+        res.status(401).json({ error: "admin token required" });
+        return;
+      }
       await redis(["DEL", key]);
       res.status(200).json({ ok: true });
       return;

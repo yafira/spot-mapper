@@ -72,6 +72,34 @@
   var swapFirstId = null;
   var editingId = null;
 
+  // admin mode: viewers get a read-only map + search, admins get the full toolkit.
+  // unlock by visiting /?admin=YOURTOKEN once, the key is kept in localstorage.
+  // the ui gating here is cosmetic, the api functions check the same token for real.
+  var ADMIN_STORAGE_KEY = "spotmapper:admintoken";
+  var adminToken = null;
+  var isAdmin = false;
+
+  function adminHeaders(base) {
+    var h = base || {};
+    if (adminToken) h["x-admin-token"] = adminToken;
+    return h;
+  }
+
+  function setAdmin(on) {
+    isAdmin = !!on;
+    document.body.classList.toggle("is-admin", isAdmin);
+    // leaving admin mode mid-task shuts down anything edit-flavored
+    if (!isAdmin) {
+      if (editMode) editBtn.click();
+      if (swapMode) swapBtn.click();
+      editingId = null;
+      swapFirstId = null;
+      stopQueue();
+    }
+    if (map) refreshMarkers();
+    refreshStatus();
+  }
+
   var profileBtn = document.getElementById("profilebtn");
   var profileMenu = document.getElementById("profilemenu");
 
@@ -204,11 +232,17 @@
     };
     fetch(SYNC_ENDPOINT + "?profile=" + encodeURIComponent(activeProfile), {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: adminHeaders({ "Content-Type": "application/json" }),
       body: JSON.stringify(payload),
     })
       .then(function (r) {
-        flashStatus(r.ok ? "☁ saved" : "☁ save failed");
+        flashStatus(
+          r.ok
+            ? "☁ saved"
+            : r.status === 401
+              ? "☁ not saved, admin key needed"
+              : "☁ save failed",
+        );
       })
       .catch(function () {
         flashStatus("☁ offline, changes are local only");
@@ -287,7 +321,7 @@
       chain = chain.then(function () {
         return fetch(MAP_ENDPOINT + qs + "&part=" + idx, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({ data: part }),
         }).then(function (r) {
           if (!r.ok) throw new Error("map chunk failed");
@@ -298,7 +332,7 @@
       .then(function () {
         return fetch(MAP_ENDPOINT + qs + "&finalize=1", {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers: adminHeaders({ "Content-Type": "application/json" }),
           body: JSON.stringify({
             name: name,
             parts: parts.length,
@@ -438,17 +472,20 @@
       (count ? " · " + count + " camper" + (count > 1 ? "s" : "") : "") +
       "</div>" +
       "</span>" +
-      '<span class="si-actions">' +
-      '<button class="si-edit" title="rename" aria-label="Rename ' +
-      escapeHtml(l.name) +
-      '">✎</button>' +
-      '<button class="si-del" title="remove" aria-label="Remove ' +
-      escapeHtml(l.name) +
-      '">×</button>' +
-      "</span>";
+      (isAdmin
+        ? '<span class="si-actions">' +
+          '<button class="si-edit" title="rename" aria-label="Rename ' +
+          escapeHtml(l.name) +
+          '">✎</button>' +
+          '<button class="si-del" title="remove" aria-label="Remove ' +
+          escapeHtml(l.name) +
+          '">×</button>' +
+          "</span>"
+        : "");
 
     function focusLoc() {
       if (!map || !markers[l.id] || (l.lat === 0 && l.lng === 0)) return;
+      ensureMapVisible();
       map.panTo([l.lat, l.lng]);
       markers[l.id].setPopupContent(locPopupHtml(l));
       markers[l.id].openPopup();
@@ -464,16 +501,20 @@
         focusLoc();
       }
     });
-    item.querySelector(".si-del").addEventListener("click", function (e) {
-      e.stopPropagation();
-      window.__removeSpot(l.id);
-    });
-    item.querySelector(".si-edit").addEventListener("click", function (e) {
-      e.stopPropagation();
-      editingId = l.id;
-      swapFirstId = null;
-      renderSidebar();
-    });
+    var locDelBtn = item.querySelector(".si-del");
+    if (locDelBtn)
+      locDelBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        window.__removeSpot(l.id);
+      });
+    var locEditBtn = item.querySelector(".si-edit");
+    if (locEditBtn)
+      locEditBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        editingId = l.id;
+        swapFirstId = null;
+        renderSidebar();
+      });
 
     sidebarList.appendChild(item);
   }
@@ -591,17 +632,20 @@
         ? '<div class="si-note">' + escapeHtml(s.notes) + "</div>"
         : "") +
       "</span>" +
-      '<span class="si-actions">' +
-      '<button class="si-edit" title="edit" aria-label="Edit ' +
-      escapeHtml(s.name) +
-      '">✎</button>' +
-      '<button class="si-del" title="remove" aria-label="Remove ' +
-      escapeHtml(s.name) +
-      '">×</button>' +
-      "</span>";
+      (isAdmin
+        ? '<span class="si-actions">' +
+          '<button class="si-edit" title="edit" aria-label="Edit ' +
+          escapeHtml(s.name) +
+          '">✎</button>' +
+          '<button class="si-del" title="remove" aria-label="Remove ' +
+          escapeHtml(s.name) +
+          '">×</button>' +
+          "</span>"
+        : "");
 
     function focusSpot() {
       if (!map || !markers[s.id] || (s.lat === 0 && s.lng === 0)) return;
+      ensureMapVisible();
       map.panTo([s.lat, s.lng]);
       markers[s.id].openPopup();
     }
@@ -618,16 +662,20 @@
         else focusSpot();
       }
     });
-    item.querySelector(".si-del").addEventListener("click", function (e) {
-      e.stopPropagation();
-      window.__removeSpot(s.id);
-    });
-    item.querySelector(".si-edit").addEventListener("click", function (e) {
-      e.stopPropagation();
-      editingId = s.id;
-      swapFirstId = null;
-      renderSidebar();
-    });
+    var spotDelBtn = item.querySelector(".si-del");
+    if (spotDelBtn)
+      spotDelBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        window.__removeSpot(s.id);
+      });
+    var spotEditBtn = item.querySelector(".si-edit");
+    if (spotEditBtn)
+      spotEditBtn.addEventListener("click", function (e) {
+        e.stopPropagation();
+        editingId = s.id;
+        swapFirstId = null;
+        renderSidebar();
+      });
 
     sidebarList.appendChild(item);
   }
@@ -801,6 +849,7 @@
   if (uploadZone) {
     ["dragenter", "dragover"].forEach(function (evt) {
       uploadZone.addEventListener(evt, function (e) {
+        if (!isAdmin) return;
         e.preventDefault();
         uploadZone.classList.add("dragover");
       });
@@ -809,6 +858,7 @@
       uploadZone.classList.remove("dragover");
     });
     uploadZone.addEventListener("drop", function (e) {
+      if (!isAdmin) return;
       e.preventDefault();
       uploadZone.classList.remove("dragover");
       readAndLoadImage(e.dataTransfer.files && e.dataTransfer.files[0]);
@@ -859,17 +909,19 @@
     html += '<div class="popup-spot">' + meta + "</div>";
     if (s.notes)
       html += '<div class="popup-notes">' + escapeHtml(s.notes) + "</div>";
-    html +=
-      '<div class="popup-actions">' +
-      '<button class="popup-edit" onclick="window.__editSpot(\'' +
-      s.id +
-      "')\">✎ edit</button>" +
-      (editMode
-        ? '<button class="popup-del" onclick="window.__removeSpot(\'' +
-          s.id +
-          "')\">remove</button>"
-        : "") +
-      "</div>";
+    if (isAdmin) {
+      html +=
+        '<div class="popup-actions">' +
+        '<button class="popup-edit" onclick="window.__editSpot(\'' +
+        s.id +
+        "')\">✎ edit</button>" +
+        (editMode
+          ? '<button class="popup-del" onclick="window.__removeSpot(\'' +
+            s.id +
+            "')\">remove</button>"
+          : "") +
+        "</div>";
+    }
     return html;
   }
 
@@ -894,17 +946,19 @@
     } else {
       html += '<div class="popup-notes">no campers assigned here yet</div>';
     }
-    html +=
-      '<div class="popup-actions">' +
-      '<button class="popup-edit" onclick="window.__editSpot(\'' +
-      l.id +
-      "')\">✎ rename</button>" +
-      (editMode
-        ? '<button class="popup-del" onclick="window.__removeSpot(\'' +
-          l.id +
-          "')\">remove</button>"
-        : "") +
-      "</div>";
+    if (isAdmin) {
+      html +=
+        '<div class="popup-actions">' +
+        '<button class="popup-edit" onclick="window.__editSpot(\'' +
+        l.id +
+        "')\">✎ rename</button>" +
+        (editMode
+          ? '<button class="popup-del" onclick="window.__removeSpot(\'' +
+            l.id +
+            "')\">remove</button>"
+          : "") +
+        "</div>";
+    }
     return html;
   }
 
@@ -1275,9 +1329,11 @@
     return Promise.all([
       fetch(SYNC_ENDPOINT + "?profile=" + encodeURIComponent(profileKey), {
         method: "DELETE",
+        headers: adminHeaders(),
       }),
       fetch(MAP_ENDPOINT + "?profile=" + encodeURIComponent(profileKey), {
         method: "DELETE",
+        headers: adminHeaders(),
       }),
     ]);
   }
@@ -1701,6 +1757,7 @@
   });
 
   window.__editSpot = function (id) {
+    if (!isAdmin) return;
     if (map) map.closePopup();
     editingId = id;
     swapFirstId = null;
@@ -1708,6 +1765,7 @@
   };
 
   window.__removeSpot = function (id) {
+    if (!isAdmin) return;
     spots = spots.filter(function (s) {
       return s.id !== id;
     });
@@ -1724,6 +1782,96 @@
     scheduleSave();
   };
 
+  // mobile map/list toggle: small screens show the placements list first,
+  // this button flips to the map (and back). the css handles which is visible.
+  var appContainer = document.querySelector(".app-container");
+  var viewToggleBtn = document.getElementById("viewtogglebtn");
+
+  viewToggleBtn.addEventListener("click", function () {
+    var showingMap = appContainer.classList.toggle("show-map");
+    viewToggleBtn.textContent = showingMap ? "☰ list" : "⌖ map";
+    viewToggleBtn.setAttribute("aria-pressed", String(showingMap));
+    if (showingMap && map) {
+      // the map was display:none, leaflet needs a nudge once it has real size
+      setTimeout(function () {
+        map.invalidateSize();
+        if (overlay && imgDims) {
+          map.fitBounds([
+            [0, 0],
+            [imgDims.h, imgDims.w],
+          ]);
+        }
+      }, 60);
+    }
+  });
+
+  function ensureMapVisible() {
+    if (
+      window.matchMedia("(max-width: 780px)").matches &&
+      !appContainer.classList.contains("show-map")
+    ) {
+      viewToggleBtn.click();
+    }
+  }
+
+  // admin bootstrapping: /?admin=TOKEN stores the key and scrubs it from the
+  // address bar, /?admin=off forgets it. the key is then verified against the
+  // backend so a wrong key falls back to viewer mode instead of failing saves.
+  function initAdmin() {
+    var params = new URLSearchParams(window.location.search);
+    var fromUrl = params.get("admin");
+    if (fromUrl !== null) {
+      try {
+        if (fromUrl === "off" || fromUrl === "") {
+          localStorage.removeItem(ADMIN_STORAGE_KEY);
+        } else {
+          localStorage.setItem(ADMIN_STORAGE_KEY, fromUrl);
+        }
+      } catch (err) {}
+      params.delete("admin");
+      var clean =
+        window.location.pathname +
+        (params.toString() ? "?" + params.toString() : "") +
+        window.location.hash;
+      window.history.replaceState(null, "", clean);
+    }
+
+    try {
+      adminToken = localStorage.getItem(ADMIN_STORAGE_KEY);
+    } catch (err) {
+      adminToken = null;
+    }
+    if (!adminToken) {
+      setAdmin(false);
+      return;
+    }
+
+    // optimistic unlock so the toolbar doesn't flash, then confirm with the api
+    setAdmin(true);
+    fetch(SYNC_ENDPOINT + "?auth=1", { headers: adminHeaders() })
+      .then(function (r) {
+        return r.ok ? r.json() : null;
+      })
+      .then(function (data) {
+        if (data && data.admin === false) {
+          setAdmin(false);
+          flashStatus("admin key rejected, viewing only");
+        }
+      })
+      .catch(function () {
+        // backend unreachable, keep admin ui so local work is still possible
+      });
+  }
+
+  document.getElementById("adminlogout").addEventListener("click", function () {
+    try {
+      localStorage.removeItem(ADMIN_STORAGE_KEY);
+    } catch (err) {}
+    adminToken = null;
+    setAdmin(false);
+    flashStatus("admin mode off");
+  });
+
   function rememberedProfile() {
     try {
       var saved = localStorage.getItem("spotmapper:profile");
@@ -1733,5 +1881,6 @@
     }
   }
 
+  initAdmin();
   loadProfile(rememberedProfile());
 })();
