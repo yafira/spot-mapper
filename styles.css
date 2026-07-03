@@ -49,6 +49,7 @@ body {
   background: var(--lavender-mist);
   color: var(--ink);
   height: 100vh;
+  height: 100dvh; /* mobile: exclude the browser url bar, falls back to 100vh */
   display: flex;
   flex-direction: column;
 }
@@ -151,6 +152,7 @@ input[type="search"]:focus {
 .app-container {
   display: flex;
   flex: 1;
+  min-height: 0; /* let it shrink to the viewport so children can scroll */
   overflow: hidden;
   position: relative;
 }
@@ -741,9 +743,15 @@ input[type="search"]:focus {
   #sidebar {
     width: 100%;
     flex: 1;
+    min-height: 0; /* flex children won't shrink below content without this,
+                      which is what blocked the list from scrolling */
     border-left: none;
     opacity: 1;
     pointer-events: auto;
+  }
+  .sidebar-list {
+    min-height: 0;
+    -webkit-overflow-scrolling: touch;
   }
   /* #viewtogglebtn adds .show-map to flip which one is visible */
   .app-container.show-map #map-wrapper {
