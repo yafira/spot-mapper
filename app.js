@@ -4,6 +4,8 @@
     generic: {
       title: "spot mapper ✦",
       btnText: "◇ Profile: Generic ▾",
+      logo: null,
+      logoAlt: "",
       mapUrl: null,
       mapName: null,
       dims: null,
@@ -19,6 +21,8 @@
     sats: {
       title: "show all things show ✦ spot mapper",
       btnText: "△ Profile: SATS ▾",
+      logo: "itpcamp_logo.png",
+      logoAlt: "ITP Camp",
       mapUrl: null,
       mapName: null,
       dims: null,
@@ -143,6 +147,15 @@
     swapFirstId = null;
 
     document.getElementById("app-title").textContent = config.title;
+    var logoEl = document.getElementById("app-logo");
+    if (config.logo) {
+      logoEl.src = config.logo;
+      logoEl.alt = config.logoAlt || "";
+      logoEl.hidden = false;
+    } else {
+      logoEl.hidden = true;
+      logoEl.removeAttribute("src");
+    }
     profileBtn.textContent = config.btnText;
     applyTheme(config.theme);
 

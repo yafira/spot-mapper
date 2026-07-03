@@ -69,6 +69,13 @@ h1 {
   letter-spacing: 0.02em;
   transition: color 0.2s ease;
 }
+#app-logo {
+  height: 48px;
+  width: auto;
+  display: block;
+  margin-right: -4px;
+  user-select: none;
+}
 .controls {
   display: flex;
   gap: 8px;
@@ -696,6 +703,9 @@ input[type="search"]:focus {
   header {
     padding: 10px 12px;
     gap: 8px;
+  }
+  #app-logo {
+    height: 36px;
   }
   .controls {
     width: 100%;
